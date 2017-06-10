@@ -1,4 +1,5 @@
-from factory_manager.factory_manager import FactoryManager
+from factory_manager.factory_stack import FactoryStack
 from factory_manager.factory_object import FactoryObject
+from factory_manager.factory_manager import FactoryManager
 
 

@@ -1,45 +1,31 @@
+import copy as copy
 
-import inspect as inspect
-import sys as sys
+class FactoryManager:
 
-class FactoryManager():
 
-    def __init__(self):
-        self.obj_list = []
-        self.available_class_types = {}
-        self.module = self.set_module()
+    def __init__(self, factory_type, module):
+        self.module = module
+        self.factory_type = factory_type
 
-        pass
-
-    def add_class_object(self, type, settings):
-
-        new_class_obj = self.available_class_types[type](**settings)
-        self.obj_list.append(new_class_obj)
+        self.factory_list = []
 
         pass
 
-    def evaluate_stack(self):
+    def add_factory_stack(self):
 
-        for obj in self.obj_list:
-            obj.do()
-        pass
+        new_factory = self.factory_type(self.module)
+        self.factory_list.append(new_factory)
 
-    def pass_thru_stack(self, input):
-        output = input
-        for obj in self.obj_list:
-            output = obj.do(output)
-        pass
+        return new_factory
+
+    def clone_subset(self, input = None, output = None, subset = None):
+
+        if subset:
+            cloned_obj = input.get_subset_by_name(subset)
+
+            for obj in cloned_obj:
+                output.push_class_object(copy.deepcopy(obj))
+
+        print(output)
 
         return output
-
-    def get_available_class_types(self):
-
-        module_list = inspect.getmembers(self.module, inspect.isclass)
-        self.available_class_types = dict(module_list)
-
-        pass
-
-    def set_module(self):
-        pass
-
-
