@@ -7,6 +7,7 @@ class FactoryManager:
         self.module = module
         self.factory_type = factory_type
 
+
         self.factory_list = []
 
         pass
