@@ -8,25 +8,36 @@ logger = logging.getLogger(__name__)
 
 class FactoryStack():
 
-    def __init__(self, module):
+    def __init__(self, module, **kwargs):
         self.obj_list = []
         self.module = module
         self.available_class_types = self.get_available_class_types()
 
         logger.debug("------ Available class types: " + str(self.available_class_types))
 
-        self.initialize_attr()
+        if kwargs:
+            for k in kwargs.keys():
+                self.__setattr__(k,kwargs[k])
+
+        self.initialize()
 
         pass
 
-    def add_class_object(self, type, settings):
+    def get(self, attr):
+        return self.__getattribute__(attr)
+
+    def set(self, attr, val):
+        return self.__setattr__(attr, val)
+
+
+    def add(self, type, settings):
 
         logger.debug("------ Add new class obj - type: " + str(type))
         logger.debug("------ From available class: " + str(self.available_class_types))
         logger.debug("------ Initialization settings: " + str(settings))
         new_class_obj = self.available_class_types[type](settings)
         self.obj_list.append(new_class_obj)
-        pass
+        return new_class_obj
 
     def push_class_object(self,new_obj):
         self.obj_list.append(new_obj)
@@ -46,9 +57,6 @@ class FactoryStack():
             output = obj.do(output)
         pass
         return output
-
-    def initialize_attr(self):
-        pass
 
     def get_available_class_types(self):
         module_list = inspect.getmembers(self.module, inspect.isclass)
@@ -78,3 +86,6 @@ class FactoryStack():
             logger.warning("No name list for subset operation - skipping...")
 
         return subset
+
+    def initialize(self):
+        pass
