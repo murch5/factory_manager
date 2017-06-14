@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 class FactoryStack():
 
-    def __init__(self, module, **kwargs):
+    def __init__(self, module, kwargs = None):
         self.obj_list = []
         self.module = module
         self.available_class_types = self.get_available_class_types()
@@ -71,7 +71,6 @@ class FactoryStack():
 
         return obj_name_list
 
-
     def get_subset_by_name(self,name_list=None):
 
         subset = []
@@ -112,8 +111,10 @@ class FactoryStack():
                 obj.get(func)()
 
 
-
         return output
+
+    def get_all(self, attr):
+        return [obj.get(attr) for obj in self.obj_list]
 
     def call(self, index, func):
         self.obj_list[index].get(func)()
