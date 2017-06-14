@@ -5,7 +5,7 @@ logger = logging.getLogger(__name__)
 
 class FactoryObject():
 
-    def __init__(self, kwargs):
+    def __init__(self, kwargs = None):
 
 
         logger.debug("Attributes: " + str(kwargs))
@@ -32,7 +32,7 @@ class FactoryObject():
                 self.__setattr__(k, new_attr_dict[k])
 
         elif overlap in ["drop","d"]:
-            for k in new_attr_dict.key():
+            for k in new_attr_dict.keys():
                 if k not in self.__dict__.keys():
                     self.__setattr__(k,new_attr_dict[k])
 
