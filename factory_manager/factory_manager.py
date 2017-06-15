@@ -25,7 +25,7 @@ class FactoryManager:
             for obj in cloned_obj:
                 output.push_class_object(copy.deepcopy(obj))
 
-        print(output)
+
 
         return(output)
 
