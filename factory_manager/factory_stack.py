@@ -1,6 +1,7 @@
 
 import inspect as inspect
 import sys as sys
+import io_util.xml_parse as xml_parser
 
 import logging
 
@@ -29,15 +30,16 @@ class FactoryStack():
     def set(self, attr, val):
         return self.__setattr__(attr, val)
 
-
-    def add(self, type, settings):
+    def add(self, type, settings, child_node=False):
 
         logger.debug("------ Add new class obj - type: " + str(type))
         logger.debug("------ From available class: " + str(self.available_class_types))
         logger.debug("------ Initialization settings: " + str(settings))
         new_class_obj = self.available_class_types[type](settings)
-        self.obj_list.append(new_class_obj)
+        if child_node==False:
+            self.obj_list.append(new_class_obj)
         return new_class_obj
+
 
     def push_class_object(self,new_obj):
         self.obj_list.append(new_obj)
@@ -110,7 +112,6 @@ class FactoryStack():
             for obj in self.obj_list:
                 obj.get(func)()
 
-
         return output
 
     def get_all(self, attr):
@@ -119,3 +120,19 @@ class FactoryStack():
     def call(self, index, func):
         self.obj_list[index].get(func)()
         pass
+
+    def populate_from_xml(self, xml):
+
+        def recurse(xml,parent_obj):
+            for child in xml:
+                child_dict = xml_parser.xml_to_dict(child)
+                if parent_obj is None:
+                    new_obj = self.add(child.tag,child_dict.get(child.tag))
+                else:
+                    new_obj = parent_obj.add_child_object(self.add(child.tag,child_dict.get(child.tag),child_node=True))
+
+                if child.find("children"):
+                   recurse(child.find("children"),new_obj)
+            pass
+
+        return recurse(xml,None)
