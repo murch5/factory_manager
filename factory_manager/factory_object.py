@@ -10,15 +10,20 @@ class FactoryObject():
         self.child_objects = None
 
         logger.debug("Attributes: " + str(kwargs))
-        for k in kwargs.keys():
-            self.__setattr__(k, kwargs[k])
+
+        if kwargs:
+            for k in kwargs.keys():
+                self.__setattr__(k, kwargs[k])
 
         self.initialize()
 
         pass
 
     def get(self, attr):
-        return self.__getattribute__(attr)
+        try:
+            return self.__getattribute__(attr)
+        except AttributeError:
+            return None
 
     def set(self, attr, val):
         return self.__setattr__(attr, val)
@@ -51,7 +56,6 @@ class FactoryObject():
         else:
             self.child_objects = [obj]
         pass
-
 
     def push_all(self,key,value):
         for obj in self.child_objects:
