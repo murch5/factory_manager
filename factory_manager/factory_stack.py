@@ -9,9 +9,10 @@ logger = logging.getLogger(__name__)
 
 class FactoryStack():
 
-    def __init__(self, module, kwargs = None):
+    def __init__(self, module, kwargs = None, xml=None):
         self.obj_list = []
         self.module = module
+        self.xml = xml
         self.available_class_types = self.get_available_class_types()
 
         logger.debug("------ Available class types: " + str(self.available_class_types))
@@ -30,11 +31,14 @@ class FactoryStack():
     def set(self, attr, val):
         return self.__setattr__(attr, val)
 
-    def add(self, type, settings, child_node=False):
+    def add(self, type, settings, settings_XML = None, child_node=False):
 
         logger.debug("------ Add new class obj - type: " + str(type))
         logger.debug("------ From available class: " + str(self.available_class_types))
         logger.debug("------ Initialization settings: " + str(settings))
+
+        if settings_XML:
+            settings.update({"settings_XML": settings_XML})
         new_class_obj = self.available_class_types[type](settings)
         if child_node==False:
             self.obj_list.append(new_class_obj)
@@ -62,8 +66,13 @@ class FactoryStack():
 
     def get_available_class_types(self):
         module_list = inspect.getmembers(self.module, inspect.isclass)
+
         return dict(module_list)
 
+        pass
+
+    def set_available_class_types(self, module_dict):
+        self.available_class_types = module_dict
         pass
 
     def generate_obj_name_list(self):
@@ -121,18 +130,36 @@ class FactoryStack():
         self.obj_list[index].get(func)()
         pass
 
-    def populate_from_xml(self, xml):
+    def populate_from_xml(self, xml, nested_type=None):
 
         def recurse(xml,parent_obj):
+
             for child in xml:
+
                 child_dict = xml_parser.xml_to_dict(child)
+
                 if parent_obj is None:
-                    new_obj = self.add(child.tag,child_dict.get(child.tag))
+                    if nested_type:
+                        type = child.findtext(nested_type)
+                        new_obj = self.add(type,child_dict.get(child.tag))
+                    else:
+                        new_obj = self.add(child.tag, child_dict.get(child.tag))
+
+                    new_obj.set("xml",child)
                 else:
-                    new_obj = parent_obj.add_child_object(self.add(child.tag,child_dict.get(child.tag),child_node=True))
+                    if nested_type:
+                        type = child.findtext(nested_type)
+                        new_obj = parent_obj.add_child_object(
+                            self.add(type, child_dict.get(child.tag), child_node=True))
+                    else:
+                        new_obj = parent_obj.add_child_object(
+                            self.add(child.tag, child_dict.get(child.tag), child_node=True))
+
+                    new_obj.set("xml",child)
 
                 if child.find("children"):
                    recurse(child.find("children"),new_obj)
             pass
 
         return recurse(xml,None)
+
