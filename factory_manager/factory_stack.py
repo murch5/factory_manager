@@ -109,6 +109,13 @@ class FactoryStack():
         self.obj_list[index].set(key,value)
         pass
 
+    def push_all_attr_dict(self, attr_dict, overlap="overwrite"):
+
+        for obj in self.obj_list:
+            obj.update_attr(attr_dict, overlap)
+
+        pass
+
     def call_all(self, func, input=None):
         output = None
         if input:
